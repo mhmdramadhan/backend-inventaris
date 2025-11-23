@@ -35,7 +35,13 @@ class ProductController extends Controller
 
     public function update(Request $request, $id)
     {
-        $product = Product::findOrFail($id);
+        $product = Product::find($id);
+        if (!$product) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Product not found'
+            ], 404);
+        }
 
         $validated = $request->validate([
             'name'     => 'string|max:255',
@@ -45,6 +51,9 @@ class ProductController extends Controller
         ]);
 
         $product->update($validated);
+
+        // Refresh model untuk mendapatkan data terbaru dari database
+        $product->refresh();
 
         return response()->json([
             'status' => true,
